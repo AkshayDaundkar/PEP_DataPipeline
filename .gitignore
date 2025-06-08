@@ -1,0 +1,33 @@
+# Terraform
+.terraform/
+terraform.tfstate
+terraform.tfstate.backup
+*.tfvars
+crash.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+.venv/
+.env.*
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+
+# AWS credentials (if any)
+*.pem
+.aws/
+
+# VSCode and editor settings
+.vscode/
+.idea/
+.DS_Store
+
+# Logs
+*.log
+
+# System files
+Thumbs.db
