@@ -42,7 +42,7 @@ def main():
         while True:
             data = generate_data()
             upload_to_s3(data)
-            time.sleep(120)  # Wait 5 minutes
+            time.sleep(120)  # Wait 2 minutes
     except KeyboardInterrupt:
         print("Simulation stopped.")
 
