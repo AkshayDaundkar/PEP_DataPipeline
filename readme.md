@@ -1,6 +1,6 @@
 # 🌱 Energy Data Pipeline — Full Stack Project
 
-This project simulates a real-time data pipeline for a mock renewable energy company, providing data ingestion, processing, storage, analytics, and a beautiful full-stack dashboard interface.
+This project simulates a real-time data pipeline on mock data for PEP renewable energy company, providing data ingestion, processing, storage, analytics, and a beautiful full-stack dashboard interface.
 
 ---
 
