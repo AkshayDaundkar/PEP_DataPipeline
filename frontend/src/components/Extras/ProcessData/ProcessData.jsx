@@ -10,7 +10,7 @@ const ProcessedData = () => {
     setLoading(true);
     try {
       const res = await fetch(
-        `http://localhost:8000/records?site_id=${siteId}`
+        import.meta.env.VITE_API_URL + `/records?site_id=${siteId}`
       );
       const data = await res.json();
       setRecords(data.records || []);

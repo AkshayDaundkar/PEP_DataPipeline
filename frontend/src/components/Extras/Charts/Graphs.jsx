@@ -7,7 +7,7 @@ const Graphs = () => {
   const [records, setRecords] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:8000/all-records")
+    fetch(import.meta.env.VITE_API_URL + "/all-records")
       .then((res) => res.json())
       .then((data) => setRecords(data.records));
   }, []);

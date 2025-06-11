@@ -9,7 +9,9 @@ const FileList = () => {
 
   const handleClick = async (filename) => {
     try {
-      const res = await fetch(`http://localhost:8000/file/${filename}`);
+      const res = await fetch(
+        import.meta.env.VITE_API_URL + `/file/${filename}`
+      );
       const data = await res.json();
       setSelectedFile(filename);
       setFileContent(data);
