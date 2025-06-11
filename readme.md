@@ -3,7 +3,7 @@
 This project simulates a real-time data pipeline on mock data for PEP renewable energy company, providing data ingestion, processing, storage, analytics, and a beautiful full-stack dashboard interface.
 
 ---
-
+### Live link:- https://pep-datapipeline-frontend.onrender.com/
 ## Project Structure
 
 ```
