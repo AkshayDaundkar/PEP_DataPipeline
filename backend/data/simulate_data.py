@@ -35,6 +35,7 @@ def upload_to_s3(data):
         ContentType='application/json'
     )
     print(f"[Uploaded] {filename} to bucket {S3_BUCKET_NAME}")
+    return filename 
 
 def main():
     print("Starting data simulation (Ctrl+C to stop)...")

@@ -6,10 +6,24 @@ from boto3.dynamodb.conditions import Key, Attr
 from decimal import Decimal
 import os
 from fastapi import HTTPException
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from data.simulate_data import generate_data, upload_to_s3
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+import json
 
+S3_BUCKET_NAME = "renewable-energy-pipeline-akshay"
+s3 = boto3.client("s3")
 
 app = FastAPI(title="Energy Data API")
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins for development; restrict in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 # AWS setup
 dynamodb = boto3.resource('dynamodb', region_name="us-east-1")
 table = dynamodb.Table("energy_data")
@@ -22,37 +36,11 @@ def clean_record(record):
     return record
 
 @app.get("/records")
-def get_records(
-    site_id: str = Query(..., description="Site ID to filter"),
-    start: Optional[str] = Query(None, description="Start timestamp (ISO 8601)"),
-    end: Optional[str] = Query(None, description="End timestamp (ISO 8601)")
-):
-    key_expr = Key("site_id").eq(site_id)
-
-    response = table.query(
-        KeyConditionExpression=key_expr
-    )
-
-    records = [clean_record(r) for r in response.get("Items", [])]
-
-    # Optional: filter by time range
-    if start or end:
-        def within_range(record):
-            try:
-                ts = datetime.fromisoformat(record["timestamp"])
-                if start:
-                    start_dt = datetime.fromisoformat(start)
-                    if ts < start_dt:
-                        return False
-                if end:
-                    end_dt = datetime.fromisoformat(end)
-                    if ts > end_dt:
-                        return False
-                return True
-            except ValueError:
-                raise HTTPException(status_code=400, detail="Invalid timestamp format. Use ISO 8601 format like '2025-06-01T00:00:00'")
-        return {"records": records}     
-
+def get_records(site_id: str):
+    from boto3.dynamodb.conditions import Key
+    response = table.query(KeyConditionExpression=Key("site_id").eq(site_id))
+    items = response.get("Items", [])
+    return {"records": [clean_record(i) for i in items]}
 
 @app.get("/anomalies/{site_id}")
 def get_anomalies(site_id: str):
@@ -62,3 +50,31 @@ def get_anomalies(site_id: str):
     items = response.get("Items", [])
     anomalies = [clean_record(i) for i in items if i.get("anomaly") == True]
     return {"anomalies": anomalies}
+
+
+
+@app.post("/simulate")
+def simulate_one_batch():
+    try:
+        data = generate_data()
+        filename = upload_to_s3(data)
+        return {"status": "success", "filename": filename}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/file/{filename}")
+def get_file_content(filename: str):
+    try:
+        obj = s3.get_object(Bucket=S3_BUCKET_NAME, Key=filename)
+        content = obj["Body"].read().decode("utf-8")
+        return JSONResponse(content=json.loads(content))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+
+@app.get("/all-records")
+def get_all_records():
+    scan = table.scan()
+    items = scan.get("Items", [])
+    return {"records": [clean_record(i) for i in items]}
