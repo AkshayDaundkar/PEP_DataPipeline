@@ -1,7 +1,7 @@
 import json
 import random
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 import boto3
 
 # AWS S3 setup
@@ -19,7 +19,7 @@ def generate_data():
     for site_id in SITE_IDS:
         entry = {
             "site_id": site_id,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "energy_generated_kwh": round(random.uniform(-10.0, 100.0), 2),
             "energy_consumed_kwh": round(random.uniform(0.0, 90.0), 2)
         }
