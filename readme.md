@@ -53,6 +53,15 @@ PEP DATA ASSESSMENT/
 
   - `main.tf`, `outputs.tf`, `variables.tf`
   - `function.zip` for Lambda deployment
+  - You have to run aws configure on Command Line & optionally have to Install AWS CLI And run this Commands
+    This stores credentials in your AWS CLI config, and Terraform automatically uses them.
+    ```bash
+    aws configure
+    -	AWS Access Key ID [None]: <your-access-key-id>
+    -	AWS Secret Access Key [None]: <your-secret-access-key>
+    -	Default region name [None]: us-east-1
+    -	Default output format [None]: json
+    ```
 
 ### 🔹 `visualization/app.py`
 
