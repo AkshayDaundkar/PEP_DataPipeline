@@ -69,6 +69,8 @@ resource "aws_lambda_function" "data_processor" {
   environment {
     variables = {
       TABLE_NAME = var.dynamodb_table
+      SNS_TOPIC_ARN = aws_sns_topic.anomaly_alerts.arn
+
     }
   }
 }
@@ -142,4 +144,34 @@ resource "aws_iam_policy_attachment" "lambda_dynamodb_policy_attach" {
   name       = "lambda-dynamodb-access-attachment"
   roles      = [aws_iam_role.lambda_exec_role.name]
   policy_arn = aws_iam_policy.lambda_dynamodb_access.arn
+}
+
+
+# Create SNS Topic
+resource "aws_sns_topic" "anomaly_alerts" { 
+  name = "energy-anomaly-alerts"
+}
+
+# Subscribe an email address to the topic
+resource "aws_sns_topic_subscription" "email_alert" {
+  topic_arn = aws_sns_topic.anomaly_alerts.arn
+  protocol  = "email"
+  endpoint  = var.alert_email  # e.g. "your.email@example.com"
+}
+
+
+resource "aws_iam_role_policy" "lambda_sns_publish" {
+  name = "LambdaSNSSendPolicy"
+  role = aws_iam_role.lambda_exec_role.name  
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = "sns:Publish"
+        Resource = aws_sns_topic.anomaly_alerts.arn
+      }
+    ]
+  })
 }

@@ -6,8 +6,11 @@ from decimal import Decimal
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(os.environ['TABLE_NAME'])
 
+
 def lambda_handler(event, context):
     s3 = boto3.client('s3')
+    sns = boto3.client('sns')
+    SNS_TOPIC_ARN = os.environ.get('SNS_TOPIC_ARN')
 
     for record in event['Records']:
         bucket_name = record['s3']['bucket']['name']
@@ -35,6 +38,21 @@ def lambda_handler(event, context):
                 'net_energy_kwh': net,
                 'anomaly': anomaly
             })
+            
+            if anomaly:
+                message = (
+                    f"Anomaly Detected!\n"
+                    f"Site: {site_id}\n"
+                    f"Timestamp: {timestamp}\n"
+                    f"Generated: {gen}\n"
+                    f"Consumed: {con}"
+                )
+                sns.publish(
+                    TopicArn=SNS_TOPIC_ARN,
+                    Subject="Energy Anomaly Alert",
+                    Message=message
+                )
+
 
     return {
         'statusCode': 200,

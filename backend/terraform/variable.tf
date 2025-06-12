@@ -9,3 +9,8 @@ variable "s3_bucket_name" {
 variable "dynamodb_table" {
   default = "energy_data"
 }
+
+variable "alert_email" {
+  description = "Email address to receive anomaly alerts"
+  type        = string
+}

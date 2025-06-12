@@ -14,3 +14,7 @@ output "dynamodb_table_name" {
 output "lambda_role_arn" {
   value = aws_iam_role.lambda_exec_role.arn
 }
+
+output "sns_topic_arn" {
+  value = aws_sns_topic.anomaly_alerts.arn
+}
