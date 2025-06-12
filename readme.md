@@ -240,10 +240,9 @@ terraform destroy
 ## Future Enhancements
 
 - Add user authentication (AWS Cognito or JWT)
-- Export charts/records to CSV
-- SNS/Email alerts for anomalies
 - Date filters and dynamic queries
 - CI/CD pipeline using GitHub Actions
+- Restrict user for 5 Simuntanious File Uploads
 
 ---
 
