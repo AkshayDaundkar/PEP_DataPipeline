@@ -46,9 +46,30 @@ function SimulatePanel() {
 
   const simulateContinuously = () => {
     if (intervalId) return;
+
+    const maxRuns = 5;
+    const intervalDuration = 2 * 60 * 1000; // 2 minutes
+    let runs = 0;
+
+    simulateData(); // Run immediately
+
     const id = setInterval(() => {
+      if (runs >= maxRuns) {
+        clearInterval(id);
+        setIntervalId(null);
+        setLog("Stopped: Max 5 simulations reached.");
+        return;
+      }
       simulateData();
-    }, 2 * 60 * 1000);
+      runs += 1;
+    }, intervalDuration);
+
+    setTimeout(() => {
+      clearInterval(id);
+      setIntervalId(null);
+      setLog("Stopped: 10 minute limit reached.");
+    }, 10 * 60 * 1000);
+
     setIntervalId(id);
     setLog("Continuous simulation started. Generating every 2 minutes...");
   };
