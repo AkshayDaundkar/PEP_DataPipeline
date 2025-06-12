@@ -3,7 +3,9 @@
 This project simulates a real-time data pipeline on mock data for PEP renewable energy company, providing data ingestion, processing, storage, analytics, and a beautiful full-stack dashboard interface.
 
 ---
+
 ### Live link:- https://pep-datapipeline-frontend.onrender.com/
+
 ## Project Structure
 
 ```
@@ -67,6 +69,37 @@ PEP DATA ASSESSMENT/
 
 - Local Streamlit dashboard (optional)
 - Superseded by frontend charts
+
+## Real-Time Anomaly Alerting via AWS SNS
+
+- **SNS Topic (`energy-anomaly-alerts`)** is created using Terraform.
+- **Email subscription** for alerts is configured through a Terraform variable.
+- **Lambda Function** is updated to publish an alert when:
+  - `energy_generated_kwh < 0` or
+  - `energy_consumed_kwh < 0`
+
+### Setup Instructions
+
+1. **Edit your `terraform.tfvars` file** and add:
+   ```hcl
+   alert_email = "your.email@example.com"
+   ```
+
+## \*\* If an anomaly is `present`, you’ll receive an email alert like:
+
+###
+
+![SNS Anomaly Alert in Mail](https://drive.google.com/file/d/1dbN-iH13BfYBzcqPmafkDe4j7PoAAFe2/view?usp=sharing)
+
+```bash
+Anomaly Detected!
+Site: test-site-123
+Timestamp: 2025-06-11T20:00:00Z
+Generated: -10
+Consumed: 20
+```
+
+###
 
 ---
 
