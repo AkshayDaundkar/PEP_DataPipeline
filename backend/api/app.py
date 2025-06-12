@@ -12,6 +12,11 @@ from data.simulate_data import generate_data, upload_to_s3
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import json
+import time
+from fastapi import Request, HTTPException
+
+LAST_SIMULATION_TIME = {}
+
 
 S3_BUCKET_NAME = "renewable-energy-pipeline-akshay"
 s3 = boto3.client("s3")
@@ -54,13 +59,28 @@ def get_anomalies(site_id: str):
 
 
 @app.post("/simulate")
-def simulate_one_batch():
+def simulate_one_batch(request: Request):
+    client_ip = request.client.host
+    now = time.time()
+
+    # Check if the IP has simulated recently
+    last_time = LAST_SIMULATION_TIME.get(client_ip, 0)
+    if now - last_time < 2 * 60:  # less than 2 minutes ago
+        raise HTTPException(
+            status_code=429,
+            detail="Too many simulations. Please wait 2 minutes before retrying."
+        )
+
+    # Update last simulation time
+    LAST_SIMULATION_TIME[client_ip] = now
+
     try:
         data = generate_data()
         filename = upload_to_s3(data)
         return {"status": "success", "filename": filename}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 
 @app.get("/file/{filename}")
