@@ -47,7 +47,7 @@ function SimulatePanel() {
   const simulateContinuously = () => {
     if (intervalId) return;
 
-    const maxRuns = 5;
+    const maxRuns = 3;
     const intervalDuration = 2 * 60 * 1000; // 2 minutes
     let runs = 0;
 
