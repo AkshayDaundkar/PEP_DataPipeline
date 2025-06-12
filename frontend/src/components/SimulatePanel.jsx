@@ -15,6 +15,15 @@ function SimulatePanel() {
     localStorage.setItem("simulatedFiles", JSON.stringify(fileList));
   }, [fileList]);
 
+  // 🧹 Clear rogue intervals from past sessions
+  useEffect(() => {
+    if (window.__simulateInterval) {
+      clearInterval(window.__simulateInterval);
+      window.__simulateInterval = null;
+      console.log("✅ Cleared leftover simulation interval on load");
+    }
+  }, []);
+
   const simulateData = async () => {
     setLoading(true);
     setLog("Simulating data and uploading file...");
@@ -45,40 +54,54 @@ function SimulatePanel() {
   };
 
   const simulateContinuously = () => {
-    if (intervalId) return;
+    if (intervalId || window.__simulateInterval) return;
 
     const maxRuns = 3;
     const intervalDuration = 2 * 60 * 1000; // 2 minutes
-    let runs = 0;
+    let runs = 1;
 
-    simulateData(); // Run immediately
+    const now = Date.now();
+    const lastStart = localStorage.getItem("last_simulation_start");
+    if (lastStart && now - parseInt(lastStart) < 10 * 60 * 1000) {
+      setLog("⚠️ Simulation recently ran. Please wait before trying again.");
+      return;
+    }
+
+    localStorage.setItem("last_simulation_start", now.toString());
+
+    simulateData(); // Run first batch immediately
 
     const id = setInterval(() => {
       if (runs >= maxRuns) {
         clearInterval(id);
+        window.__simulateInterval = null;
         setIntervalId(null);
         setLog("Stopped: Max 5 simulations reached.");
         return;
       }
       simulateData();
-      runs += 1;
+      runs++;
     }, intervalDuration);
 
+    window.__simulateInterval = id;
+    setIntervalId(id);
+    setLog("Continuous simulation started (every 2 mins, max 5 runs).");
+
+    // Safety timeout to auto-stop after 10 mins
     setTimeout(() => {
       clearInterval(id);
+      window.__simulateInterval = null;
       setIntervalId(null);
-      setLog("Stopped: 10 minute limit reached.");
+      setLog("⏱️ Stopped: 10-minute limit reached.");
     }, 10 * 60 * 1000);
-
-    setIntervalId(id);
-    setLog("Continuous simulation started. Generating every 2 minutes...");
   };
 
   const stopSimulation = () => {
-    if (intervalId) {
-      clearInterval(intervalId);
+    if (intervalId || window.__simulateInterval) {
+      clearInterval(intervalId || window.__simulateInterval);
+      window.__simulateInterval = null;
       setIntervalId(null);
-      setLog("Continuous simulation stopped.");
+      setLog("Continuous simulation manually stopped.");
     }
   };
 
@@ -99,7 +122,7 @@ function SimulatePanel() {
 
         <button
           onClick={simulateContinuously}
-          disabled={intervalId !== null}
+          disabled={intervalId !== null || window.__simulateInterval}
           className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition"
         >
           Start Continuous
@@ -107,7 +130,7 @@ function SimulatePanel() {
 
         <button
           onClick={stopSimulation}
-          disabled={intervalId === null}
+          disabled={intervalId === null && !window.__simulateInterval}
           className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition"
         >
           Stop
