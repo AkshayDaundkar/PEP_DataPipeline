@@ -89,7 +89,7 @@ PEP DATA ASSESSMENT/
 
 ###
 
-![SNS Anomaly Alert in Mail](https://drive.google.com/file/d/1dbN-iH13BfYBzcqPmafkDe4j7PoAAFe2/view?usp=sharing)
+![SNS Anomaly Alert in Mail](https://imgur.com/a/iM0mThp)
 
 ```bash
 Anomaly Detected!
