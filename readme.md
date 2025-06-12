@@ -89,7 +89,7 @@ PEP DATA ASSESSMENT/
 
 ###
 
-![SNS Anomaly Alert in Mail](https://i.imgur.com/y4zMHtd.png)
+<img src="https://i.imgur.com/1D43kbe.png" alt="SNS Anomaly Alert Flow" width="400" height="150"/>
 
 ```bash
 Anomaly Detected!
