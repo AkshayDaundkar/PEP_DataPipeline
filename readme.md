@@ -20,7 +20,7 @@ PEP DATA ASSESSMENT/
 
 ### 🔹 `api/app.py` (FastAPI)
 
-- `/simulate` — Uploads one file with energy data to S3
+- `/simulatedata` — Uploads one file with energy data to S3
 - `/file/{filename}` — Returns file content from S3
 - `/records` — Fetches all processed records for a `site_id` from DynamoDB
 - `/all-records` — Scans entire DynamoDB table (used for graphs)
@@ -33,7 +33,7 @@ PEP DATA ASSESSMENT/
   - `site_id`, `timestamp`, `energy_generated_kwh`, `energy_consumed_kwh`
 
 - Uploads the file to S3
-- Exposed to FastAPI via `/simulate`
+- Exposed to FastAPI via `/simulatedata`
 
 ### 🔹 `lambda/process_data.py`
 

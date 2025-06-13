@@ -58,7 +58,7 @@ def get_anomalies(site_id: str):
 
 
 
-@app.post("/simulate")
+@app.post("/simulatedata")
 def simulate_one_batch(request: Request):
     client_ip = request.client.host
     now = time.time()

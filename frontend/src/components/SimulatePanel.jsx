@@ -29,7 +29,7 @@ function SimulatePanel() {
     setLog("Simulating data and uploading file...");
 
     try {
-      const res = await fetch(import.meta.env.VITE_API_URL + "/simulate", {
+      const res = await fetch(import.meta.env.VITE_API_URL + "/simulatedata", {
         method: "POST",
       });
 
