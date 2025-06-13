@@ -5,6 +5,7 @@ function SimulatePanel() {
   const [log, setLog] = useState("");
   const [file, setFile] = useState("");
   const [intervalId, setIntervalId] = useState(null);
+  const [isSimulating, setIsSimulating] = useState(false);
 
   const [fileList, setFileList] = useState(() => {
     const saved = localStorage.getItem("simulatedFiles");
@@ -15,7 +16,7 @@ function SimulatePanel() {
     localStorage.setItem("simulatedFiles", JSON.stringify(fileList));
   }, [fileList]);
 
-  // 🧹 Clear rogue intervals from past sessions
+  // Clear rogue intervals on page load
   useEffect(() => {
     if (window.__simulateInterval) {
       clearInterval(window.__simulateInterval);
@@ -42,9 +43,9 @@ function SimulatePanel() {
         };
         setFile(data.filename);
         setFileList((prev) => [newFile, ...prev]);
-        setLog(`File "${data.filename}" created and uploaded to S3`);
+        setLog(`File "${data.filename}" uploaded to S3`);
       } else {
-        setLog(`Error: ${data.detail || "Failed to simulate data"}`);
+        setLog(`Error: ${data.detail || "Simulation failed"}`);
       }
     } catch (err) {
       setLog(`Network error: ${err.message}`);
@@ -63,20 +64,22 @@ function SimulatePanel() {
     const now = Date.now();
     const lastStart = localStorage.getItem("last_simulation_start");
     if (lastStart && now - parseInt(lastStart) < 10 * 60 * 1000) {
-      setLog("⚠️ Simulation recently ran. Please wait before trying again.");
+      setLog("⚠️ Simulation recently ran. Try again after 10 mins.");
       return;
     }
 
     localStorage.setItem("last_simulation_start", now.toString());
 
-    simulateData(); // Run first batch immediately
+    simulateData(); // First run
+    setIsSimulating(true);
 
     const id = setInterval(() => {
       if (runs >= maxRuns) {
         clearInterval(id);
         window.__simulateInterval = null;
         setIntervalId(null);
-        setLog("Stopped: Max 5 simulations reached.");
+        setIsSimulating(false);
+        setLog("Stopped: Max 3 simulations completed.");
         return;
       }
       simulateData();
@@ -85,13 +88,14 @@ function SimulatePanel() {
 
     window.__simulateInterval = id;
     setIntervalId(id);
-    setLog("Continuous simulation started (every 2 mins, max 5 runs).");
+    setLog("Continuous simulation started: every 2 mins, max 5 runs.");
 
-    // Safety timeout to auto-stop after 10 mins
+    // Auto stop after 10 minutes
     setTimeout(() => {
       clearInterval(id);
       window.__simulateInterval = null;
       setIntervalId(null);
+      setIsSimulating(false);
       setLog("⏱️ Stopped: 10-minute limit reached.");
     }, 10 * 60 * 1000);
   };
@@ -101,40 +105,43 @@ function SimulatePanel() {
       clearInterval(intervalId || window.__simulateInterval);
       window.__simulateInterval = null;
       setIntervalId(null);
+      setIsSimulating(false);
       setLog("Continuous simulation manually stopped.");
     }
   };
 
   return (
-    <div className="bg-white text-black p-8 rounded-2xl shadow-2xl w-full max-w-3xl mx-auto mt-10 border border-gray-200">
-      <h2 className="text-3xl font-bold mb-6 text-blue-900 flex items-center gap-2">
+    <div className="bg-white text-black p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-3xl mx-auto mt-10 border border-gray-200">
+      <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-blue-900 flex items-center gap-2">
         Simulate Data
       </h2>
 
-      <div className="flex gap-4 mb-4">
+      <div className="flex flex-wrap gap-4 mb-4">
         <button
           onClick={simulateData}
-          disabled={loading}
+          disabled={loading || isSimulating}
           className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition"
         >
           {loading ? "Simulating..." : "Simulate Once"}
         </button>
 
-        <button
-          onClick={simulateContinuously}
-          disabled={intervalId !== null || window.__simulateInterval}
-          className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition"
-        >
-          Start Continuous
-        </button>
+        {!isSimulating && (
+          <button
+            onClick={simulateContinuously}
+            className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition"
+          >
+            Start Continuous
+          </button>
+        )}
 
-        <button
-          onClick={stopSimulation}
-          disabled={intervalId === null && !window.__simulateInterval}
-          className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition"
-        >
-          Stop
-        </button>
+        {isSimulating && (
+          <button
+            onClick={stopSimulation}
+            className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition"
+          >
+            Stop Simulation
+          </button>
+        )}
       </div>
 
       {file && (
@@ -143,7 +150,7 @@ function SimulatePanel() {
         </p>
       )}
 
-      <pre className="mt-4 bg-gray-100 p-4 rounded-md text-sm text-gray-700 border border-gray-200">
+      <pre className="mt-4 bg-gray-100 p-4 rounded-md text-sm text-gray-700 border border-gray-200 whitespace-pre-wrap break-words">
         {log}
       </pre>
 
