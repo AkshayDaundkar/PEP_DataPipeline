@@ -59,29 +59,13 @@ def get_anomalies(site_id: str):
 
 
 @app.post("/simulatedata")
-def simulate_one_batch(request: Request):
-    client_ip = request.client.host
-    now = time.time()
-
-    # Check if the IP has simulated recently
-    last_time = LAST_SIMULATION_TIME.get(client_ip, 0)
-    if now - last_time < 2 * 60:  # less than 2 minutes ago
-        raise HTTPException(
-            status_code=429,
-            detail="Too many simulations. Please wait 2 minutes before retrying."
-        )
-
-    # Update last simulation time
-    LAST_SIMULATION_TIME[client_ip] = now
-
+def simulate_one_batch():
     try:
         data = generate_data()
         filename = upload_to_s3(data)
         return {"status": "success", "filename": filename}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-
 
 @app.get("/file/{filename}")
 def get_file_content(filename: str):
