@@ -63,8 +63,8 @@ function SimulatePanel() {
 
     const now = Date.now();
     const lastStart = localStorage.getItem("last_simulation_start");
-    if (lastStart && now - parseInt(lastStart) < 10 * 60 * 1000) {
-      setLog("⚠️ Simulation recently ran. Try again after 10 mins.");
+    if (lastStart && now - parseInt(lastStart) < 1 * 60 * 1000) {
+      setLog("⚠️ Simulation recently ran. Try again after 1 mins.");
       return;
     }
 
