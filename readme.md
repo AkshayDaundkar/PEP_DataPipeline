@@ -1,4 +1,4 @@
-# 🌱 Energy Data Pipeline — Full Stack Project
+# Energy Data Pipeline — Full Stack Project
 
 This project simulates a real-time data pipeline on mock data for PEP renewable energy company, providing data ingestion, processing, storage, analytics, and a beautiful full-stack dashboard interface.
 
@@ -18,7 +18,7 @@ PEP DATA ASSESSMENT/
 
 ## Backend Overview — `/backend`
 
-### 🔹 `api/app.py` (FastAPI)
+### `api/app.py` (FastAPI)
 
 - `/simulatedata` — Uploads one file with energy data to S3
 - `/file/{filename}` — Returns file content from S3
@@ -26,7 +26,7 @@ PEP DATA ASSESSMENT/
 - `/all-records` — Scans entire DynamoDB table (used for graphs)
 - Includes CORS support for React frontend
 
-### 🔹 `data/simulate_data.py`
+### `data/simulate_data.py`
 
 - Generates random JSON for multiple sites:
 
@@ -35,7 +35,7 @@ PEP DATA ASSESSMENT/
 - Uploads the file to S3
 - Exposed to FastAPI via `/simulatedata`
 
-### 🔹 `lambda/process_data.py`
+### `lambda/process_data.py`
 
 - Lambda triggered by new S3 files
 - Parses file → computes:
@@ -45,7 +45,7 @@ PEP DATA ASSESSMENT/
 
 - Writes each entry to DynamoDB (`energy_data` table)
 
-### 🔹 `terraform/`
+### `terraform/`
 
 - Provisions the entire backend infra:
 
@@ -65,7 +65,7 @@ PEP DATA ASSESSMENT/
     -	Default output format [None]: json
     ```
 
-### 🔹 `visualization/app.py`
+### `visualization/app.py`
 
 - Local Streamlit dashboard (optional)
 - Superseded by frontend charts
@@ -111,7 +111,7 @@ Consumed: 20
 - **Tailwind CSS** for clean design
 - **Recharts** for visualization
 
-### 📂 Folder Structure
+### Folder Structure
 
 ```
 src/
@@ -161,7 +161,7 @@ src/
 - Table includes: `timestamp`, `generated`, `consumed`, `net`, `anomaly`
 - Highlights anomaly rows
 
-### ⚡ UI
+### UI
 
 - Sidebar layout inspired by Daxwell’s SmartBot
 - Fully responsive, mobile-friendly layout
@@ -169,7 +169,7 @@ src/
 
 ---
 
-## 🛠️ Setup Instructions
+## Setup Instructions
 
 ### 1. Backend
 
@@ -237,12 +237,41 @@ terraform destroy
 
 ---
 
+## Strengths
+
+- Serverless: Uses AWS Lambda, S3, and DynamoDB, which scale automatically with load.
+- Event-driven: S3 triggers Lambda, so processing is decoupled from ingestion.
+- No servers to manage: All compute is managed by AWS.
+- Alerting: Real-time anomaly detection and notification via SNS.
+
+## Limitations
+
+- Batch Size: Each simulation batch is small; Lambda is invoked per file.
+- DynamoDB Partitioning: If site_id is not well-distributed, you could hit hot partitions.
+- S3/Lambda Limits: Large files or high frequency could hit Lambda timeout or S3 event limits.
+- No Data Validation: Minimal validation on input data.
+- No Authentication: All API endpoints are open (CORS allows all origins).
+- No Retry/Dead-letter: Failed Lambda executions are not retried or logged to a DLQ.
+
 ## Future Enhancements
 
-- Add user authentication (AWS Cognito or JWT)
-- Date filters and dynamic queries
-- CI/CD pipeline using GitHub Actions
-- Restrict user for 5 Simuntanious File Uploads
+### Scalability & Reliability
+
+- Batch Processing: For large data, consider batching or chunking uploads.
+- Dead-letter Queues: Add DLQ to Lambda for failed events.
+- Monitoring: Add CloudWatch alarms for Lambda errors, DynamoDB throttling, etc.
+- Data Validation: Validate data before writing to DynamoDB.
+- Authentication: Add JWT or AWS Cognito for API security.
+- Rate Limiting: Prevent abuse of simulation endpoint.
+- Pagination: For /all-records, implement DynamoDB pagination (scan can be slow/expensive).
+- Indexing: Add GSI (Global Secondary Index) for more flexible queries (e.g., by timestamp).
+- Cost Optimization: Monitor DynamoDB and S3 usage.
+
+### Data Engineering
+
+ETL Pipelines: For more complex processing, consider AWS Glue or Step Functions.
+Data Lake: Store raw and processed data in S3 for analytics.
+Analytics: Integrate with AWS Athena or Redshift for advanced querying.
 
 ---
 
